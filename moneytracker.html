@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker - Premium</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #090d16;
+            --card-bg: rgba(21, 28, 44, 0.75);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Light Theme Overrides */
+        body.light-theme {
+            --bg: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Top Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1.2rem 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 10px var(--primary-glow));
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .theme-toggle-btn, .export-btn, .privacy-toggle-btn {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle-btn:hover, .export-btn:hover, .privacy-toggle-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--input-bg);
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .month-selector select {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            transition: filter 0.3s ease;
+        }
+
+        .stat-value.salary { color: var(--success); }
+        .stat-value.expense { color: var(--danger); }
+        .stat-value.balance { color: #3b82f6; }
+        .stat-value.pending { color: var(--warning); }
+
+        /* PRIVACY MODE BLUR STYLING */
+        body.privacy-mode .stat-value,
+        body.privacy-mode .friend-pill-amount,
+        body.privacy-mode .amount-col {
+            filter: blur(7px);
+            user-select: none;
+        }
+
+        /* Hover to peek in Privacy Mode */
+        body.privacy-mode .stat-card:hover .stat-value,
+        body.privacy-mode tr:hover .amount-col {
+            filter: blur(0px);
+        }
+
+        /* Friends Pending Summary Pills */
+        .friends-summary-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .friend-pill {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Main Content Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 980px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--card-bg);
+            padding: 1.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            height: fit-content;
+        }
+
+        .form-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .form-control option {
+            background-color: #151c2c;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Type Switch Buttons */
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .type-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px 4px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .type-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        /* Time Pills */
+        .time-pills {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .pill-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pill-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        /* Table Card */
+        .table-card {
+            background: var(--card-bg);
+            padding: 1.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+        }
+
+        .table-header-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 250px;
+        }
+
+        .search-box input {
+            padding-left: 35px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 14px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.95rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .badge-time {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-morning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .badge-evening { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+        .badge-night { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+        .person-tag {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .status-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-btn.paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .status-btn.unpaid {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .status-btn.self {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            cursor: default;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .btn-delete:hover { color: var(--danger); }
+
+        .split-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Money <small style="font-size: 10px; color: var(--primary);">Expense</small></span>
+        </div>
+
+        <div class="header-actions">
+            <!-- Privacy Toggle Button -->
+            <button class="privacy-toggle-btn" onclick="togglePrivacy()" id="privacyBtn">
+                <i class="fa-solid fa-eye"></i> Hide Amounts
+            </button>
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
+                <i class="fa-solid fa-moon"></i> Dark
+            </button>
+
+            <!-- Export to CSV -->
+            <button class="export-btn" onclick="exportToCSV()">
+                <i class="fa-solid fa-file-csv" style="color: var(--success);"></i> Export Excel
+            </button>
+
+            <!-- Month Selector -->
+            <div class="month-selector">
+                <i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i>
+                <select id="monthSelect" onchange="loadMonthData()">
+                    <option value="2026-08">August 2026</option>
+                    <option value="2026-09">September 2026</option>
+                    <option value="2026-10">October 2026</option>
+                    <option value="2026-11">November 2026</option>
+                    <option value="2026-12">December 2026</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">Salary / Opening</div>
+            <div class="stat-value salary" id="displaySalary">₹15,682</div>
+            <button onclick="updateSalary()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:11px; margin-top:5px;"><i class="fa-solid fa-pen"></i> Edit Amount</button>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">My Own Expense</div>
+            <div class="stat-value expense" id="displayExpense">₹0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Pending (To Receive)</div>
+            <div class="stat-value pending" id="displayPending">₹0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Current Cash Balance</div>
+            <div class="stat-value balance" id="displayBalance">₹15,682</div>
+        </div>
+    </div>
+
+    <!-- Friend-wise Pending Breakdown -->
+    <div class="friends-summary-bar" id="friendsPendingSummary">
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;"><i class="fa-solid fa-users" style="color: var(--primary);"></i> Pending by Member:</span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">No pending debts from friends!</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-layout">
+        <!-- Entry Form -->
+        <div class="form-card">
+            <div class="form-title">
+                <i class="fa-solid fa-circle-plus" style="color: var(--primary);"></i> Add New Expense
+            </div>
+
+            <form id="expenseForm" onsubmit="addExpense(event)">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="expDate" class="form-control" required>
+                </div>
+
+                <!-- Expense Type -->
+                <div class="form-group">
+                    <label>Expense Type</label>
+                    <div class="type-options">
+                        <button type="button" class="type-btn active" onclick="setExpenseType('PERSONAL', this)">Personal</button>
+                        <button type="button" class="type-btn" onclick="setExpenseType('SHARED', this)">Shared / Split</button>
+                        <button type="button" class="type-btn" onclick="setExpenseType('FRIEND', this)">Full Friend</button>
+                    </div>
+                </div>
+
+                <!-- Friend Dropdown -->
+                <div class="form-group" id="friendGroup" style="display: none;">
+                    <label>Select Friend</label>
+                    <select id="expPerson" class="form-control" onchange="handlePersonChange(this)">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Time Period</label>
+                    <div class="time-pills">
+                        <button type="button" class="pill-btn active" onclick="selectTime('Morning', this)">
+                            <i class="fa-solid fa-sun" style="color: #fbbf24;"></i> Morning
+                        </button>
+                        <button type="button" class="pill-btn" onclick="selectTime('Evening', this)">
+                            <i class="fa-solid fa-cloud-sun" style="color: #c084fc;"></i> Evening
+                        </button>
+                        <button type="button" class="pill-btn" onclick="selectTime('Night', this)">
+                            <i class="fa-solid fa-moon" style="color: #60a5fa;"></i> Night
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description / Items</label>
+                    <input type="text" id="expCategory" placeholder="e.g. Maggie + Milk + Carrot" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label id="totalAmountLabel">Total Bill Amount Paid (₹)</label>
+                    <input type="number" id="expAmount" placeholder="0.00" class="form-control" step="0.01" oninput="calculateSplit()" required>
+                </div>
+
+                <!-- Shared Split Input -->
+                <div class="form-group" id="sharedGroup" style="display: none; background: rgba(99, 102, 241, 0.1); padding: 12px; border-radius: 10px; border: 1px dashed var(--primary);">
+                    <label style="color: #a5b4fc; font-weight: 600;">Friend's Share (Owed Amount ₹)</label>
+                    <input type="number" id="friendShareAmount" placeholder="30.00" class="form-control" step="0.01" oninput="calculateSplit()">
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                        My Own Share: <strong id="myAutoShare" style="color: var(--success);">₹0.00</strong>
+                    </div>
+                </div>
+
+                <div class="form-group" id="statusGroup" style="display: none;">
+                    <label>Payment Status from Friend</label>
+                    <select id="expStatus" class="form-control">
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Paid">Paid</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="expPayment" class="form-control">
+                        <option value="UPI / Super Money">UPI / Super Money</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">Add Expense</button>
+            </form>
+        </div>
+
+        <!-- Table View -->
+        <div class="table-card">
+            <div class="table-header-tools">
+                <span style="font-weight: 700; font-size: 1.1rem;">Expense Log</span>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="tableSearch" class="form-control" placeholder="Search item or friend..." onkeyup="filterTable()">
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date & Day</th>
+                            <th>Time</th>
+                            <th>Person</th>
+                            <th>Description</th>
+                            <th>Payment</th>
+                            <th>Total Bill</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedTimePeriod = "Morning";
+    let currentExpenseType = "PERSONAL"; // PERSONAL, SHARED, FRIEND
+    let isPrivacyOn = false;
+    
+    // Stored Members List
+    let membersList = JSON.parse(localStorage.getItem('tracker_members')) || ["Arush", "Jefferson", "Mahesh"];
+
+    // Default Data Structure
+    let appData = JSON.parse(localStorage.getItem('premium_tracker_data')) || {
+        "2026-08": { salary: 15682, expenses: [] },
+        "2026-09": { salary: 15000, expenses: [] }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('expDate').valueAsDate = new Date();
+        renderMemberOptions();
+        
+        // Restore Privacy Mode
+        if (localStorage.getItem('privacy_mode') === 'true') {
+            isPrivacyOn = true;
+            document.body.classList.add('privacy-mode');
+            document.getElementById('privacyBtn').innerHTML = `<i class="fa-solid fa-eye-slash" style="color:var(--warning);"></i> Show Amounts`;
+        }
+
+        // Restore saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeBtn').innerHTML = `<i class="fa-solid fa-sun" style="color:#f59e0b;"></i> Light`;
+        }
+
+        loadMonthData();
+    });
+
+    function togglePrivacy() {
+        isPrivacyOn = !isPrivacyOn;
+        const privacyBtn = document.getElementById('privacyBtn');
+        
+        if (isPrivacyOn) {
+            document.body.classList.add('privacy-mode');
+            privacyBtn.innerHTML = `<i class="fa-solid fa-eye-slash" style="color:var(--warning);"></i> Show Amounts`;
+            localStorage.setItem('privacy_mode', 'true');
+        } else {
+            document.body.classList.remove('privacy-mode');
+            privacyBtn.innerHTML = `<i class="fa-solid fa-eye"></i> Hide Amounts`;
+            localStorage.setItem('privacy_mode', 'false');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-theme');
+        const themeBtn = document.getElementById('themeBtn');
+        if (document.body.classList.contains('light-theme')) {
+            themeBtn.innerHTML = `<i class="fa-solid fa-sun" style="color:#f59e0b;"></i> Light`;
+            localStorage.setItem('theme', 'light');
+        } else {
+            themeBtn.innerHTML = `<i class="fa-solid fa-moon"></i> Dark`;
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    function setExpenseType(type, btn) {
+        currentExpenseType = type;
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const friendGroup = document.getElementById('friendGroup');
+        const sharedGroup = document.getElementById('sharedGroup');
+        const statusGroup = document.getElementById('statusGroup');
+
+        if (type === 'PERSONAL') {
+            friendGroup.style.display = 'none';
+            sharedGroup.style.display = 'none';
+            statusGroup.style.display = 'none';
+        } else if (type === 'SHARED') {
+            friendGroup.style.display = 'block';
+            sharedGroup.style.display = 'block';
+            statusGroup.style.display = 'block';
+            calculateSplit();
+        } else if (type === 'FRIEND') {
+            friendGroup.style.display = 'block';
+            sharedGroup.style.display = 'none';
+            statusGroup.style.display = 'block';
+        }
+    }
+
+    function renderMemberOptions() {
+        const select = document.getElementById('expPerson');
+        select.innerHTML = '';
+        membersList.forEach(m => {
+            select.innerHTML += `<option value="${m}">${m}</option>`;
+        });
+        select.innerHTML += `<option value="ADD_NEW" style="color:var(--primary); font-weight:bold;">+ Add New Member...</option>`;
+    }
+
+    function handlePersonChange(select) {
+        if (select.value === 'ADD_NEW') {
+            const newName = prompt("Enter New Member Name:");
+            if (newName && newName.trim() !== '') {
+                const cleanName = newName.trim();
+                if (!membersList.includes(cleanName)) {
+                    membersList.push(cleanName);
+                    localStorage.setItem('tracker_members', JSON.stringify(membersList));
+                }
+                renderMemberOptions();
+                select.value = cleanName;
+            } else {
+                select.value = membersList[0];
+            }
+        }
+    }
+
+    function calculateSplit() {
+        if (currentExpenseType !== 'SHARED') return;
+        const total = parseFloat(document.getElementById('expAmount').value) || 0;
+        const friendShare = parseFloat(document.getElementById('friendShareAmount').value) || 0;
+        const myShare = Math.max(0, total - friendShare);
+        document.getElementById('myAutoShare').innerText = `₹${myShare.toFixed(2)}`;
+    }
+
+    function selectTime(time, btn) {
+        selectedTimePeriod = time;
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function getCurrentMonthKey() {
+        return document.getElementById('monthSelect').value;
+    }
+
+    function sanitizeItem(item) {
+        const totalAmount = Number(item.totalAmount || item.amount || 0);
+        const type = item.type || (item.person && !item.person.includes('Self') ? 'FRIEND' : 'PERSONAL');
+        const myShare = item.myShare !== undefined ? Number(item.myShare) : (type === 'PERSONAL' ? totalAmount : 0);
+        const friendShare = item.friendShare !== undefined ? Number(item.friendShare) : (type === 'FRIEND' ? totalAmount : 0);
+        const person = item.person || "Self";
+        const status = item.status || "Paid";
+
+        return {
+            date: item.date || "2026-08-01",
+            time: item.time || "Morning",
+            type: type,
+            person: person,
+            status: status,
+            category: item.category || "General",
+            totalAmount: totalAmount,
+            friendShare: friendShare,
+            myShare: myShare,
+            payment: item.payment || "UPI / Super Money"
+        };
+    }
+
+    function loadMonthData() {
+        const monthKey = getCurrentMonthKey();
+        
+        if (!appData[monthKey]) {
+            appData[monthKey] = { salary: 15682, expenses: [] };
+        }
+
+        const currentData = appData[monthKey];
+        currentData.expenses = currentData.expenses.map(sanitizeItem);
+
+        let myExpensesTotal = 0;
+        let pendingAmount = 0;
+        let totalCashSpent = 0;
+        let friendPendingMap = {};
+
+        currentData.expenses.forEach(item => {
+            totalCashSpent += item.totalAmount;
+
+            if (item.type === 'PERSONAL') {
+                myExpensesTotal += item.totalAmount;
+            } else if (item.type === 'FRIEND') {
+                if (item.status === 'Unpaid') {
+                    pendingAmount += item.totalAmount;
+                    friendPendingMap[item.person] = (friendPendingMap[item.person] || 0) + item.totalAmount;
+                }
+            } else if (item.type === 'SHARED') {
+                myExpensesTotal += item.myShare;
+                if (item.status === 'Unpaid') {
+                    pendingAmount += item.friendShare;
+                    friendPendingMap[item.person] = (friendPendingMap[item.person] || 0) + item.friendShare;
+                }
+            }
+        });
+
+        let cashReturnedFromFriends = 0;
+        currentData.expenses.forEach(item => {
+            if (item.status === 'Paid') {
+                if (item.type === 'FRIEND') cashReturnedFromFriends += item.totalAmount;
+                if (item.type === 'SHARED') cashReturnedFromFriends += item.friendShare;
+            }
+        });
+
+        const salary = Number(currentData.salary || 15682);
+        const currentCashBalance = salary - totalCashSpent + cashReturnedFromFriends;
+
+        document.getElementById('displaySalary').innerText = `₹${salary.toLocaleString()}`;
+        document.getElementById('displayExpense').innerText = `₹${myExpensesTotal.toLocaleString()}`;
+        document.getElementById('displayPending').innerText = `₹${pendingAmount.toLocaleString()}`;
+        document.getElementById('displayBalance').innerText = `₹${currentCashBalance.toLocaleString()}`;
+
+        // Render Friend Pending Breakdown
+        const friendBar = document.getElementById('friendsPendingSummary');
+        let friendPillsHTML = `<span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;"><i class="fa-solid fa-users" style="color: var(--primary);"></i> Pending by Member:</span>`;
+        
+        const friendKeys = Object.keys(friendPendingMap);
+        if (friendKeys.length === 0) {
+            friendPillsHTML += `<span style="font-size: 0.8rem; color: var(--text-muted);">No pending debts from friends!</span>`;
+        } else {
+            friendKeys.forEach(f => {
+                friendPillsHTML += `<div class="friend-pill"><i class="fa-solid fa-clock"></i> ${f}: <span class="friend-pill-amount">₹${friendPendingMap[f].toFixed(2)}</span></div>`;
+            });
+        }
+        friendBar.innerHTML = friendPillsHTML;
+
+        renderTableRows(currentData.expenses);
+    }
+
+    function renderTableRows(expensesList) {
+        const tbody = document.getElementById('expenseTableBody');
+        tbody.innerHTML = '';
+
+        if(expensesList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:2rem;">No expenses found.</td></tr>`;
+            return;
+        }
+
+        expensesList.forEach((item, index) => {
+            const dateObj = new Date(item.date);
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            let timeBadgeClass = "badge-morning";
+            let timeIcon = "fa-sun";
+            if(item.time === "Evening") { timeBadgeClass = "badge-evening"; timeIcon = "fa-cloud-sun"; }
+            if(item.time === "Night") { timeBadgeClass = "badge-night"; timeIcon = "fa-moon"; }
+
+            let personTag = `<span class="person-tag">Self</span>`;
+            let splitDetails = ``;
+
+            if (item.type === 'FRIEND') {
+                personTag = `<span class="person-tag">${item.person}</span>`;
+            } else if (item.type === 'SHARED') {
+                personTag = `<span class="person-tag">Self + ${item.person}</span>`;
+                splitDetails = `<div class="split-info">Mine: ₹${item.myShare.toFixed(2)} | ${item.person}: ₹${item.friendShare.toFixed(2)}</div>`;
+            }
+
+            let statusBtnHTML = `<span class="status-btn self"><i class="fa-solid fa-check"></i> Self</span>`;
+            if (item.type !== 'PERSONAL') {
+                if (item.status === 'Unpaid') {
+                    statusBtnHTML = `<button class="status-btn unpaid" onclick="toggleStatus(${index})"><i class="fa-solid fa-clock"></i> Unpaid</button>`;
+                } else {
+                    statusBtnHTML = `<button class="status-btn paid" onclick="toggleStatus(${index})"><i class="fa-solid fa-circle-check"></i> Paid</button>`;
+                }
+            }
+
+            const row = `
+                <tr>
+                    <td><strong>${item.date}</strong> <br><small style="color:var(--text-muted);">${dayName}</small></td>
+                    <td><span class="badge-time ${timeBadgeClass}"><i class="fa-solid ${timeIcon}"></i> ${item.time}</span></td>
+                    <td>${personTag}</td>
+                    <td>${item.category} ${splitDetails}</td>
+                    <td><small style="color:var(--text-muted);">${item.payment}</small></td>
+                    <td style="font-weight:700; color:var(--danger);" class="amount-col">₹${item.totalAmount.toFixed(2)}</td>
+                    <td>${statusBtnHTML}</td>
+                    <td><button class="btn-delete" onclick="deleteExpense(${index})"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function addExpense(e) {
+        e.preventDefault();
+        const monthKey = getCurrentMonthKey();
+        const totalAmt = parseFloat(document.getElementById('expAmount').value);
+
+        let friendShare = 0;
+        let myShare = totalAmt;
+        let person = "Self";
+
+        if (currentExpenseType === 'SHARED') {
+            person = document.getElementById('expPerson').value;
+            friendShare = parseFloat(document.getElementById('friendShareAmount').value) || 0;
+            myShare = Math.max(0, totalAmt - friendShare);
+        } else if (currentExpenseType === 'FRIEND') {
+            person = document.getElementById('expPerson').value;
+            friendShare = totalAmt;
+            myShare = 0;
+        }
+
+        const newExpense = {
+            date: document.getElementById('expDate').value,
+            time: selectedTimePeriod,
+            type: currentExpenseType,
+            person: person,
+            status: (currentExpenseType === 'PERSONAL') ? 'Paid' : document.getElementById('expStatus').value,
+            category: document.getElementById('expCategory').value,
+            totalAmount: totalAmt,
+            friendShare: friendShare,
+            myShare: myShare,
+            payment: document.getElementById('expPayment').value
+        };
+
+        appData[monthKey].expenses.unshift(newExpense);
+        saveData();
+        loadMonthData();
+
+        // Reset form
+        document.getElementById('expCategory').value = '';
+        document.getElementById('expAmount').value = '';
+        document.getElementById('friendShareAmount').value = '';
+        document.getElementById('myAutoShare').innerText = '₹0.00';
+    }
+
+    function toggleStatus(index) {
+        const monthKey = getCurrentMonthKey();
+        const item = appData[monthKey].expenses[index];
+        item.status = (item.status === 'Unpaid') ? 'Paid' : 'Unpaid';
+        saveData();
+        loadMonthData();
+    }
+
+    function deleteExpense(index) {
+        const monthKey = getCurrentMonthKey();
+        appData[monthKey].expenses.splice(index, 1);
+        saveData();
+        loadMonthData();
+    }
+
+    function filterTable() {
+        const q = document.getElementById('tableSearch').value.toLowerCase();
+        const monthKey = getCurrentMonthKey();
+        const filtered = appData[monthKey].expenses.filter(i => 
+            i.category.toLowerCase().includes(q) || 
+            i.person.toLowerCase().includes(q) || 
+            i.payment.toLowerCase().includes(q)
+        );
+        renderTableRows(filtered);
+    }
+
+    function exportToCSV() {
+        const monthKey = getCurrentMonthKey();
+        const expenses = appData[monthKey].expenses;
+        
+        if (expenses.length === 0) {
+            alert("No data to export!");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Type,Person,Description,Payment,Total Bill,My Share,Friend Share,Status\n";
+        expenses.forEach(e => {
+            csvContent += `${e.date},${e.time},${e.type},${e.person},"${e.category}",${e.payment},${e.totalAmount},${e.myShare},${e.friendShare},${e.status}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Expense_${monthKey}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function updateSalary() {
+        const monthKey = getCurrentMonthKey();
+        const newSalary = prompt("Enter Total Salary / Opening Available Amount for this month:", appData[monthKey].salary);
+        if (newSalary !== null && !isNaN(newSalary)) {
+            appData[monthKey].salary = parseFloat(newSalary);
+            saveData();
+            loadMonthData();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('premium_tracker_data', JSON.stringify(appData));
+    }
+</script>
+
+</body>
+</html>
